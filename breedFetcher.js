@@ -1,35 +1,44 @@
 const request = require('request');
-const args = process.argv;
-let gnort = (args.slice(2));
-const cat = gnort[0];
-//const file = gnort[1];
-//const fs = require('fs')
-//const text = "./index.html"
-//const net = require('net');
-//const words = ""
+const searchTerm = (process.argv.slice(2))[0];
 
-request('https://api.thecatapi.com/v1/breeds/search?q=' + cat, (error, response, body) => {
-  //console.log('error:', error); // Print the error if one occurred
-  // console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-  // console.log('body:', body); // Print the HTML for the Google homepage.
-  // console.log(typeof body)
-  const data = JSON.parse(body);
-  // console.log(data);
-  // console.log(typeof data);
-
+const fetchBreedDescription = function(search, callback) {
   
-  try {
-    const breed = (data[0].name);
-    const desc = (data[0].description);
-    console.log(breed + ":", desc);
+  request('https://api.thecatapi.com/v1/breeds/search?q=' + search, (error, response, body) => {
+    
+    if(error) {
+      console.log("stupid error!!!");
+      callback(error, null)
+      return
     }
-  catch(err) {
-    console.log("Input proper breed!");
-  } 
 
-  //console.log(data[0].name);
+    const data = JSON.parse(body);
+    if(!data.length) {
+      callback("Breed Not Found", null)
+      return 
+    }
 
-});
+    const breed = data[0]
+    callback(null, breed.description)
+    
+  });
+};
+
+const myfunction1 = function(err, desc) {
+  if(err) console.log("We Got an Error");
+  console.log(searchTerm + ":", desc);
+}
+
+// const myfunction2 = function(err, desc) {
+//   console.log("Inside FUNC#2", desc);
+// }
+
+// const myfunction3 = function(err, desc) {
+//   console.log("FUNC#3 I do Nothing!");
+// }
 
 
+fetchBreedDescription(searchTerm, myfunction1)
+// fetchBreedDescription(searchTerm, myfunction2)
+// fetchBreedDescription(searchTerm, myfunction3)
 
+module.exports = { fetchBreedDescription };
